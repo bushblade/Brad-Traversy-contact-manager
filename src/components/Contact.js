@@ -2,11 +2,10 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import './Contact.css'
 
-class Contact extends Component { 
-  
+class Contact extends Component {
   state = {}
 
-  showClick = () => {
+  showClick = e => {
     console.log(this.state)
   }
 
@@ -14,11 +13,12 @@ class Contact extends Component {
     const { name, email, phone } = this.props.contact
     return (
       <div className="card card-body mb-3">
-        <h4>{ name } <i onClick={this.showClick}
-        className="fas fa-sort-down"></i></h4>
+        <h4>
+          {name} <i onClick={this.showClick} className="fas fa-sort-down" />
+        </h4>
         <ul className="list-group">
-          <li className="list-group-item">Email: { email }</li>
-          <li className="list-group-item">Phone: { phone }</li>
+          <li className="list-group-item">Email: {email}</li>
+          <li className="list-group-item">Phone: {phone}</li>
         </ul>
       </div>
     )
