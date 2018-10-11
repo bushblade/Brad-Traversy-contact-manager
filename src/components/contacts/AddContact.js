@@ -11,21 +11,12 @@ class AddContact extends Component {
   }
 
   setdefaultState = () => {
-    this.setState({
-      name: { val: '', err: 'Name is required', msg: null },
-      email: { val: '', err: 'Not a valid email', msg: null },
-      phone: { val: '', err: 'Not a valid phone number', msg: null }
-    })
-  }
-
-  updateField = (field, value) => {
-    this.setState(prevState => ({
-      [field]: {
-        val: value,
-        err: prevState[field].err,
-        msg: prevState[field].msg
-      }
-    }))
+    const defaultState = { ...this.state }
+    for (let key in defaultState) {
+      defaultState[key].val = ''
+      defaultState[key].msg = null
+    }
+    this.setState(defaultState)
   }
 
   createContactPayload = () => {
@@ -39,48 +30,42 @@ class AddContact extends Component {
   }
 
   submit = context => {
-    console.log('submitting')
-    if (Object.keys(this.state).every(field => this.validate(field))) {
+    if (
+      Object.keys(this.state).every(field =>
+        this.validate(field, this.state[field].val)
+      )
+    ) {
       context.dispatch({
         type: 'ADD_CONTACT',
         payload: this.createContactPayload()
       })
       this.setdefaultState()
+      return
     }
     Object.keys(this.state).forEach(field => this.validate(field))
   }
 
-  validate = field => {
-    console.log(`validating ${field}`)
+  validate = (field, value) => {
     const regex = {
       name: /\S/,
-      email: /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/,
-      phone: /^(\d\-?)+$/g
+      email: /^([a-zA-Z0-9_\-.]+)@([a-zA-Z0-9_\-.]+)\.([a-zA-Z]{2,5})$/,
+      phone: /^(\d-?)+$/g
     }
+    let valid,
+      update = { ...this.state }
+    update[field].val = value
     if (
-      !regex[field].test(this.state[field].val) ||
-      this.state[field].val.length === 0
+      !regex[field].test(update[field].val) ||
+      update[field].val.length === 0
     ) {
-      console.log('not valid')
-      this.setState(prevState => ({
-        [field]: {
-          val: prevState[field].val,
-          err: prevState[field].err,
-          msg: prevState[field].err
-        }
-      }))
-      return false
+      update[field].msg = update[field].err
+      valid = false
     } else {
-      console.log('valid')
-      this.setState(prevState => ({
-        [field]: {
-          val: prevState[field].val,
-          err: prevState[field].err,
-          msg: prevState[field].null
-        }
-      }))
-      return true
+      update[field].msg = null
+      valid = true
     }
+    this.setState(update)
+    return valid
   }
 
   render() {
@@ -100,7 +85,7 @@ class AddContact extends Component {
                     <TextInputGroup
                       name={field}
                       val={this.state[field].val}
-                      update={this.updateField}
+                      update={this.validate}
                       key={field}
                       errMsg={this.state[field].msg}
                     />
