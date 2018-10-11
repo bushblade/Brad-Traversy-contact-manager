@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import './Contact.css'
 import { Consumer } from '../../context'
 
 class Contact extends Component {
