@@ -1,7 +1,26 @@
 import React, { Component } from 'react'
 import { Consumer } from '../../context'
-import TextInputGroup from '../layout/TextInputGroup'
 import uuid from 'uuid'
+import axios from 'axios'
+
+import TextInputGroup from '../layout/TextInputGroup'
+
+const defaultState = ({ ...state }) => {
+  for (let key in state) {
+    state[key].val = ''
+    state[key].msg = null
+  }
+  return state
+}
+
+const createContactPayload = ({ name, email, phone }) => {
+  return {
+    name: name.val,
+    email: email.val,
+    phone: phone.val,
+    id: uuid()
+  }
+}
 
 class AddContact extends Component {
   state = {
@@ -10,36 +29,21 @@ class AddContact extends Component {
     phone: { val: '', err: 'Not a valid phone number', msg: null }
   }
 
-  setdefaultState = () => {
-    const defaultState = { ...this.state }
-    for (let key in defaultState) {
-      defaultState[key].val = ''
-      defaultState[key].msg = null
-    }
-    this.setState(defaultState)
-  }
-
-  createContactPayload = () => {
-    const { name, email, phone } = this.state
-    return {
-      name: name.val,
-      email: email.val,
-      phone: phone.val,
-      id: uuid()
-    }
-  }
-
-  submit = context => {
+  submit = ({ context: { dispatch }, state }) => {
     if (
-      Object.keys(this.state).every(field =>
-        this.validate(field, this.state[field].val)
-      )
+      Object.keys(state).every(field => this.validate(field, state[field].val))
     ) {
-      context.dispatch({
-        type: 'ADD_CONTACT',
-        payload: this.createContactPayload()
-      })
-      this.setdefaultState()
+      const newContact = createContactPayload(state)
+      axios
+        .post(`https://jsonplaceholder.typicode.com/users`, newContact)
+        .then(res => {
+          dispatch({
+            type: 'ADD_CONTACT',
+            payload: newContact
+          })
+          this.setState(defaultState)
+          this.props.history.push('/')
+        })
       return
     }
     Object.keys(this.state).forEach(field => this.validate(field))
@@ -51,13 +55,10 @@ class AddContact extends Component {
       email: /^([a-zA-Z0-9_\-.]+)@([a-zA-Z0-9_\-.]+)\.([a-zA-Z]{2,5})$/,
       phone: /^(\d-?)+$/g
     }
-    let valid,
-      update = { ...this.state }
+    let valid
+    let update = { ...this.state }
     update[field].val = value
-    if (
-      !regex[field].test(update[field].val) ||
-      update[field].val.length === 0
-    ) {
+    if (!regex[field].test(value) || value.length === 0) {
       update[field].msg = update[field].err
       valid = false
     } else {
@@ -78,7 +79,7 @@ class AddContact extends Component {
               <form
                 onSubmit={e => {
                   e.preventDefault()
-                  this.submit(context)
+                  this.submit({ context, state: this.state })
                 }}>
                 {Object.keys(this.state).map(field => {
                   return (
