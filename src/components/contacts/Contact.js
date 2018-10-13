@@ -3,6 +3,16 @@ import PropTypes from 'prop-types'
 import { Consumer } from '../../context'
 import axios from 'axios'
 
+const deleteContact = async ({ dispatch }, id) => {
+  try {
+    await axios.delete(`https://jsonplaceholder.typicode.com/users/${id}`)
+  } catch (e) {
+    console.log(e)
+  } finally {
+    dispatch({ type: 'DELETE_CONTACT', payload: id })
+  }
+}
+
 class Contact extends Component {
   state = {
     showContactInfo: false
@@ -13,7 +23,7 @@ class Contact extends Component {
     const { showContactInfo } = this.state
     return (
       <Consumer>
-        {value => (
+        {context => (
           <div className="card card-body mb-3">
             <h4>
               {name}{' '}
@@ -29,15 +39,7 @@ class Contact extends Component {
               <i
                 className="fas fa-times"
                 style={{ cursor: 'pointer', float: 'right', color: 'red' }}
-                onClick={() => {
-                  axios
-                    .delete(`https://jsonplaceholder.typicode.com/users/${id}`)
-                    .then(res => console.log('delete request sent'))
-                    .catch(err => console.log(err))
-                    .finally(() =>
-                      value.dispatch({ type: 'DELETE_CONTACT', payload: id })
-                    )
-                }}
+                onClick={() => deleteContact(context, id)}
               />
             </h4>
             {showContactInfo ? (

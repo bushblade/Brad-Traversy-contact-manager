@@ -29,24 +29,16 @@ class AddContact extends Component {
     phone: { val: '', err: 'Not a valid phone number', msg: null }
   }
 
-  submit = ({ context: { dispatch }, state }) => {
-    if (
-      Object.keys(state).every(field => this.validate(field, state[field].val))
-    ) {
+  submit = async ({ context: { dispatch }, state }) => {
+    if (Object.keys(state).every(field => this.validate(field, state[field].val))) {
       const newContact = createContactPayload(state)
-      axios
-        .post(`https://jsonplaceholder.typicode.com/users`, newContact)
-        .then(res => {
-          dispatch({
-            type: 'ADD_CONTACT',
-            payload: newContact
-          })
-          this.setState(defaultState)
-          this.props.history.push('/')
-        })
+      const res = await axios.post(`https://jsonplaceholder.typicode.com/users`, newContact)
+      dispatch({ type: 'ADD_CONTACT', payload: res.data })
+      this.setState(defaultState)
+      this.props.history.push('/')
       return
     }
-    Object.keys(this.state).forEach(field => this.validate(field))
+    Object.keys(state).forEach(field => this.validate(field, state[field].val))
   }
 
   validate = (field, value) => {
@@ -56,7 +48,7 @@ class AddContact extends Component {
       phone: /^(\d-?)+$/g
     }
     let valid
-    let update = { ...this.state }
+    let update = { [field]: { ...this.state[field] } }
     update[field].val = value
     if (!regex[field].test(value) || value.length === 0) {
       update[field].msg = update[field].err
@@ -92,11 +84,7 @@ class AddContact extends Component {
                     />
                   )
                 })}
-                <input
-                  type="submit"
-                  value="Add Contact"
-                  className="btn btn-block btn-light"
-                />
+                <input type="submit" value="Add Contact" className="btn btn-block btn-light" />
               </form>
             </div>
           </div>
