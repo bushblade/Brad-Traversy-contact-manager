@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
-import 'bootstrap/dist/css/bootstrap.min.css'
-import { ContextProvider } from './context'
+import { Provider } from 'react-redux'
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
+import store from './store'
 
 import Contacts from './components/contacts/Contacts'
 import Header from './components/layout/Header'
@@ -10,10 +10,12 @@ import EditContact from './components/contacts/EditContact'
 import About from './components/pages/About'
 import NotFound from './components/pages/NotFound'
 
+import 'bootstrap/dist/css/bootstrap.min.css'
+
 class App extends Component {
   render() {
     return (
-      <ContextProvider>
+      <Provider store={store}>
         <Router>
           <div className="App">
             <Header branding="Contact Manager" />
@@ -28,7 +30,7 @@ class App extends Component {
             </div>
           </div>
         </Router>
-      </ContextProvider>
+      </Provider>
     )
   }
 }
