@@ -7,13 +7,17 @@ const reducer = (state, action) => {
   switch (action.type) {
     case 'DELETE_CONTACT':
       return {
-        contacts: state.contacts.filter(
-          contact => contact.id !== action.payload
-        )
+        contacts: state.contacts.filter(contact => contact.id !== action.payload)
       }
     case 'ADD_CONTACT':
       return {
         contacts: [action.payload, ...state.contacts]
+      }
+    case 'EDIT_CONTACT':
+      return {
+        contacts: state.contacts.map(contact => {
+          return contact.id === action.payload.id ? action.payload : contact
+        })
       }
     default:
       return state
