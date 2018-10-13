@@ -1,26 +1,9 @@
 import React, { Component } from 'react'
 import { Consumer } from '../../context'
-import uuid from 'uuid'
 import axios from 'axios'
+import { defaultState, createContactPayload, validate, updateFormField } from './contactHelpers'
 
 import TextInputGroup from '../layout/TextInputGroup'
-
-const defaultState = ({ ...state }) => {
-  for (let key in state) {
-    state[key].val = ''
-    state[key].msg = null
-  }
-  return state
-}
-
-const createContactPayload = ({ name, email, phone }) => {
-  return {
-    name: name.val,
-    email: email.val,
-    phone: phone.val,
-    id: uuid()
-  }
-}
 
 class AddContact extends Component {
   state = {
@@ -30,7 +13,7 @@ class AddContact extends Component {
   }
 
   submit = async ({ context: { dispatch }, state }) => {
-    if (Object.keys(state).every(field => this.validate(field, state[field].val))) {
+    if (Object.keys(state).every(field => validate(field, state[field].val))) {
       const newContact = createContactPayload(state)
       const res = await axios.post(`https://jsonplaceholder.typicode.com/users`, newContact)
       dispatch({ type: 'ADD_CONTACT', payload: res.data })
@@ -38,27 +21,11 @@ class AddContact extends Component {
       this.props.history.push('/')
       return
     }
-    Object.keys(state).forEach(field => this.validate(field, state[field].val))
+    Object.keys(state).forEach(field => this.updateField(field, state[field].val))
   }
 
-  validate = (field, value) => {
-    const regex = {
-      name: /\S/,
-      email: /^([a-zA-Z0-9_\-.]+)@([a-zA-Z0-9_\-.]+)\.([a-zA-Z]{2,5})$/,
-      phone: /^(\d-?)+$/g
-    }
-    let valid
-    let update = { [field]: { ...this.state[field] } }
-    update[field].val = value
-    if (!regex[field].test(value) || value.length === 0) {
-      update[field].msg = update[field].err
-      valid = false
-    } else {
-      update[field].msg = null
-      valid = true
-    }
-    this.setState(update)
-    return valid
+  updateField = (field, value) => {
+    this.setState(prevState => updateFormField(prevState, field, value))
   }
 
   render() {
@@ -78,7 +45,7 @@ class AddContact extends Component {
                     <TextInputGroup
                       name={field}
                       val={this.state[field].val}
-                      update={this.validate}
+                      update={this.updateField}
                       key={field}
                       errMsg={this.state[field].msg}
                     />
