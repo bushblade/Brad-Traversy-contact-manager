@@ -1,4 +1,4 @@
-import uuid from 'uuid'
+// import uuid from 'uuid'
 
 const defaultState = ({ ...state }) => {
   for (let key in state) {
@@ -12,8 +12,8 @@ const createContactPayload = ({ name, email, phone }) => {
   return {
     name: name.val,
     email: email.val,
-    phone: phone.val,
-    id: uuid()
+    phone: phone.val
+    // id: uuid()
   }
 }
 

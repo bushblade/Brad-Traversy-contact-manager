@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
-import { Consumer } from '../../context'
-import axios from 'axios'
+import PropTypes from 'prop-types'
+import { connect } from 'react-redux'
+import { addContact } from '../../actions/contactActions'
 import { defaultState, createContactPayload, validate, updateFormField } from './contactHelpers'
 
 import TextInputGroup from '../layout/TextInputGroup'
@@ -12,16 +13,16 @@ class AddContact extends Component {
     phone: { val: '', err: 'Not a valid phone number', msg: null }
   }
 
-  submit = async ({ context: { dispatch }, state }) => {
+  submit = () => {
+    const { props, state } = this
     if (Object.keys(state).every(field => validate(field, state[field].val))) {
       const newContact = createContactPayload(state)
-      const res = await axios.post(`https://jsonplaceholder.typicode.com/users`, newContact)
-      dispatch({ type: 'ADD_CONTACT', payload: res.data })
+      props.addContact(newContact)
       this.setState(defaultState)
-      this.props.history.push('/')
+      props.history.push('/')
       return
     }
-    Object.keys(state).forEach(field => this.updateField(field, state[field].val))
+    Object.keys(this.state).forEach(field => this.updateField(field, this.state[field].val))
   }
 
   updateField = (field, value) => {
@@ -30,35 +31,38 @@ class AddContact extends Component {
 
   render() {
     return (
-      <Consumer>
-        {context => (
-          <div className="card mb-3">
-            <div className="card-header">Add Contact</div>
-            <div className="card-body">
-              <form
-                onSubmit={e => {
-                  e.preventDefault()
-                  this.submit({ context, state: this.state })
-                }}>
-                {Object.keys(this.state).map(field => {
-                  return (
-                    <TextInputGroup
-                      name={field}
-                      val={this.state[field].val}
-                      update={this.updateField}
-                      key={field}
-                      errMsg={this.state[field].msg}
-                    />
-                  )
-                })}
-                <input type="submit" value="Add Contact" className="btn btn-block btn-light" />
-              </form>
-            </div>
-          </div>
-        )}
-      </Consumer>
+      <div className="card mb-3">
+        <div className="card-header">Add Contact</div>
+        <div className="card-body">
+          <form
+            onSubmit={e => {
+              e.preventDefault()
+              this.submit()
+            }}>
+            {Object.keys(this.state).map(field => {
+              return (
+                <TextInputGroup
+                  name={field}
+                  val={this.state[field].val}
+                  update={this.updateField}
+                  key={field}
+                  errMsg={this.state[field].msg}
+                />
+              )
+            })}
+            <input type="submit" value="Add Contact" className="btn btn-block btn-light" />
+          </form>
+        </div>
+      </div>
     )
   }
 }
 
-export default AddContact
+AddContact.propTypes = {
+  addContact: PropTypes.func.isRequired
+}
+
+export default connect(
+  null,
+  { addContact }
+)(AddContact)
