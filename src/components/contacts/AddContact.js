@@ -39,7 +39,8 @@ class AddContact extends Component {
                 onSubmit={e => {
                   e.preventDefault()
                   this.submit({ context, state: this.state })
-                }}>
+                }}
+              >
                 {Object.keys(this.state).map(field => {
                   return (
                     <TextInputGroup

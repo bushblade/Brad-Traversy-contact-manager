@@ -13,7 +13,7 @@ const Contacts = props => (
             List
           </h1>
           {contacts.map(contact => (
-            <Contact key={contact.id} contact={contact} />
+            <Contact key={contact.email} contact={contact} />
           ))}
         </React.Fragment>
       )
